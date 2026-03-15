@@ -42,15 +42,19 @@ fetch("catalog_FDSP_jijel.csv")
 .then(response => response.text())
 .then(text => {
 
-    const rows = text.split("\n");
+    const rows = text.split(/\r?\n/);
 
     rows.slice(1).forEach(row => {
 
-        let cols = row.split(";"); // إذا كان CSV مفصول بـ ;
+        if(!row.trim()) return;
+
+        let cols = row.split(";");
 
         if(cols.length < 8){
-            cols = row.split(","); // وإذا كان مفصول بـ ,
+            cols = row.split(",");
         }
+
+        cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
 
         if(cols.length >= 8){
             data.push({
@@ -89,9 +93,9 @@ function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
 
     const filtered = data.filter(r =>
-        r.title.toLowerCase().includes(q) ||
-        r.author.toLowerCase().includes(q) ||
-        r.class.toLowerCase().includes(q)
+        (r.title && r.title.toLowerCase().includes(q)) ||
+        (r.author && r.author.toLowerCase().includes(q)) ||
+        (r.class && r.class.toLowerCase().includes(q))
     );
 
     display(filtered);
