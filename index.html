@@ -209,24 +209,28 @@ function prevPage(){
 }
 
 // PDF
-function downloadPDF(){
+async function downloadPDF(){
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const tableData = data.slice(0,50).map(r => [
-        r.title,
-        r.author,
-        r.publisher,
-        r.place,
-        r.edition,
-        r.year,
-        r.class
-    ]);
+    const font = await fetch("https://fdsp-jijel.github.io/FDSP-jijel-catalog.github.io/Amiri-Regular.ttf")
+        .then(res => res.arrayBuffer());
 
-    doc.autoTable({
-        head: [["العنوان","المؤلف","الناشر","المكان","الطبعة","السنة","التصنيف"]],
-        body: tableData,
-        styles: { halign: "right" }
+    doc.addFileToVFS("Amiri.ttf", font);
+    doc.addFont("Amiri.ttf", "Amiri", "normal");
+    doc.setFont("Amiri");
+
+    let y = 10;
+
+    data.slice(0,50).forEach((r,i)=>{
+        doc.text(
+            `${i+1} - ${r.title} - ${r.author}`,
+            200,
+            y,
+            { align: "right" }
+        );
+        y += 8;
     });
 
     doc.save("catalog.pdf");
