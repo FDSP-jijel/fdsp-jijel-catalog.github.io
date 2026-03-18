@@ -56,20 +56,27 @@ fetch("catalog_FDSP_jijel.csv")
 
         let cols = row.split("\t");
 
+if(cols.length < 8){
+    cols = row.split(";");
+}
+
+if(cols.length < 8){
+    cols = row.split(",");
+}
+
 cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
 
-        if(cols.length >= 8){
-            data.push({
-    title: cols[1] || "",
-    author: cols[2] || "",
-    publisher: cols[3] || "",
-    place: cols[5] || "",
-    edition: cols[6] || "",
-    year: cols[4] || "",
-    class: cols[7] || ""
-});
-                
-        }
+if(cols.length > 1){
+    data.push({
+        title: cols[1] || "",
+        author: cols[2] || "",
+        publisher: cols[3] || "",
+        place: cols[5] || "",
+        edition: cols[6] || "",
+        year: cols[4] || "",
+        class: cols[7] || ""
+    });
+}
     });
 
     console.log("Books loaded:", data.length);  // كم كتاب تم قراءته
