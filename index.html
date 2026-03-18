@@ -13,10 +13,11 @@ body{
 h1{color:#003366;}
 input{
     padding:12px;
-    width:300px;
+    width:250px;
     font-size:16px;
     border-radius:8px;
     border:1px solid #ccc;
+    margin:5px;
 }
 table{
     border-collapse:collapse;
@@ -48,7 +49,10 @@ button{
 button:hover{background:#0055aa;}
 </style>
 
+<!-- مكتبات -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 </head>
 
@@ -57,7 +61,16 @@ button:hover{background:#0055aa;}
 <h1>فهرس مكتبة كلية الحقوق والعلوم السياسية</h1>
 <p>جامعة محمد الصديق بن يحيى – جيجل – الجزائر</p>
 
-<input type="text" id="search" placeholder="ابحث عن كتاب..." onkeyup="searchTable()">
+<!-- البحث -->
+<input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
+
+<!-- فلترة -->
+<br>
+<input type="text" id="authorFilter" placeholder="فلترة بالمؤلف">
+<input type="text" id="yearFilter" placeholder="فلترة بالسنة">
+<button onclick="advancedFilter()">تطبيق الفلتر</button>
+
+<p id="count"></p>
 
 <table id="table">
 <thead>
@@ -81,18 +94,17 @@ button:hover{background:#0055aa;}
 
 <br>
 <button onclick="downloadPDF()">تحميل PDF</button>
+<button onclick="downloadExcel()">تحميل Excel</button>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    
 <script>
 
 let data = [];
 let currentPage = 1;
 let rowsPerPage = 100;
 
+// تحميل CSV
 fetch("catalog_FDSP_jijel.csv")
-.then(response => response.text())
+.then(res => res.text())
 .then(text => {
 
     text = text.replace(/^\uFEFF/, "");
@@ -104,7 +116,6 @@ fetch("catalog_FDSP_jijel.csv")
         if(!row.trim()) return;
 
         let cols = row.split(/[\t;,]/);
-
         cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
 
         if(cols.length >= 8){
@@ -123,16 +134,16 @@ fetch("catalog_FDSP_jijel.csv")
     display(data);
 });
 
+// عرض البيانات
 function display(rows){
+
     const table = document.querySelector("#table tbody");
     table.innerHTML="";
 
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    const pageRows = rows.slice(start, end);
-
-    pageRows.forEach(r=>{
+    rows.slice(start, end).forEach(r=>{
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -150,8 +161,12 @@ function display(rows){
 
     document.getElementById("pageInfo").innerText =
         "صفحة " + currentPage + " / " + Math.ceil(rows.length / rowsPerPage);
+
+    document.getElementById("count").innerText =
+        "عدد الكتب: " + rows.length;
 }
 
+// البحث
 function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
 
@@ -165,6 +180,22 @@ function searchTable(){
     display(filtered);
 }
 
+// فلترة متقدمة
+function advancedFilter(){
+
+    const author = document.getElementById("authorFilter").value.toLowerCase();
+    const year = document.getElementById("yearFilter").value;
+
+    const filtered = data.filter(r =>
+        (!author || r.author.toLowerCase().includes(author)) &&
+        (!year || r.year.includes(year))
+    );
+
+    currentPage = 1;
+    display(filtered);
+}
+
+// التنقل
 function nextPage(){
     currentPage++;
     display(data);
@@ -177,6 +208,7 @@ function prevPage(){
     }
 }
 
+// PDF
 function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -194,13 +226,18 @@ function downloadPDF(){
     doc.autoTable({
         head: [["العنوان","المؤلف","الناشر","المكان","الطبعة","السنة","التصنيف"]],
         body: tableData,
-        styles: {
-            font: "helvetica",
-            halign: "right"
-        }
+        styles: { halign: "right" }
     });
 
     doc.save("catalog.pdf");
+}
+
+// Excel
+function downloadExcel(){
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "catalog");
+    XLSX.writeFile(wb, "catalog.xlsx");
 }
 
 </script>
