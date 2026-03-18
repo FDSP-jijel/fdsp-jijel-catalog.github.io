@@ -54,22 +54,21 @@ fetch("catalog_FDSP_jijel.csv")
 
         if(!row.trim()) return;
 
-        let cols = row.split(";");
+        let cols = row.split("\t");
 
-        if(cols.length < 8){
-            cols = row.split(",");
-        }
-
-        cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
+cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
 
         if(cols.length >= 8){
             data.push({
-                title: cols[1] || "",
-                author: cols[2] || "",
-                publisher: cols[3] || "",
-                year: cols[4] || "",
-                class: cols[7] || ""
-            });
+    title: cols[1] || "",
+    author: cols[2] || "",
+    publisher: cols[3] || "",
+    place: cols[5] || "",
+    edition: cols[6] || "",
+    year: cols[4] || "",
+    class: cols[7] || ""
+});
+                
         }
     });
 
@@ -87,10 +86,12 @@ function display(rows){
 
         tr.innerHTML = `
         <td>${r.title}</td>
-        <td>${r.author}</td>
-        <td>${r.publisher}</td>
-        <td>${r.year}</td>
-        <td>${r.class}</td>
+<td>${r.author}</td>
+<td>${r.publisher}</td>
+<td>${r.place}</td>
+<td>${r.edition}</td>
+<td>${r.year}</td>
+<td>${r.class}</td>
         `;
 
         table.appendChild(tr);
