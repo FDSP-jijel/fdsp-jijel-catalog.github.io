@@ -5,13 +5,50 @@
 <title>فهرس مكتبة كلية الحقوق والعلوم السياسية – جامعة جيجل</title>
 
 <style>
-body{font-family:Arial;margin:40px;background:#f5f5f5}
-h1{color:#003366}
-input{padding:10px;width:300px;font-size:16px}
-table{border-collapse:collapse;width:100%;margin-top:20px;background:white}
-th,td{border:1px solid #ccc;padding:8px;text-align:right}
-th{background:#003366;color:white}
+body{
+    font-family:Arial;
+    margin:40px;
+    background:linear-gradient(to right,#eef2f3,#dfe9f3);
+}
+h1{color:#003366;}
+input{
+    padding:12px;
+    width:300px;
+    font-size:16px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+table{
+    border-collapse:collapse;
+    width:100%;
+    margin-top:20px;
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+}
+th,td{
+    border:1px solid #eee;
+    padding:10px;
+    text-align:right;
+}
+th{
+    background:#003366;
+    color:white;
+}
+tr:hover{background:#f1f1f1;}
+button{
+    padding:10px 15px;
+    margin:5px;
+    border:none;
+    background:#003366;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+button:hover{background:#0055aa;}
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
@@ -37,16 +74,25 @@ th{background:#003366;color:white}
 <tbody></tbody>
 </table>
 
+<br>
+<button onclick="prevPage()">السابق</button>
+<span id="pageInfo"></span>
+<button onclick="nextPage()">التالي</button>
+
+<br>
+<button onclick="downloadPDF()">تحميل PDF</button>
+
 <script>
+
 let data = [];
+let currentPage = 1;
+let rowsPerPage = 100;
 
 fetch("catalog_FDSP_jijel.csv")
 .then(response => response.text())
 .then(text => {
 
     text = text.replace(/^\uFEFF/, "");
-
-    console.log("CSV loaded");
 
     const rows = text.split(/\r?\n/);
 
@@ -71,44 +117,77 @@ fetch("catalog_FDSP_jijel.csv")
         }
     });
 
-    // ✅ هنا المكان الصحيح
-    console.log("Books loaded:", data.length);
     display(data);
 });
-
 
 function display(rows){
     const table = document.querySelector("#table tbody");
     table.innerHTML="";
 
-    rows.slice(0,300).forEach(r=>{
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    const pageRows = rows.slice(start, end);
+
+    pageRows.forEach(r=>{
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
         <td>${r.title}</td>
-<td>${r.author}</td>
-<td>${r.publisher}</td>
-<td>${r.place}</td>
-<td>${r.edition}</td>
-<td>${r.year}</td>
-<td>${r.class}</td>
+        <td>${r.author}</td>
+        <td>${r.publisher}</td>
+        <td>${r.place}</td>
+        <td>${r.edition}</td>
+        <td>${r.year}</td>
+        <td>${r.class}</td>
         `;
 
         table.appendChild(tr);
     });
+
+    document.getElementById("pageInfo").innerText =
+        "صفحة " + currentPage + " / " + Math.ceil(rows.length / rowsPerPage);
 }
 
 function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
 
     const filtered = data.filter(r =>
-        (r.title && r.title.toLowerCase().includes(q)) ||
-        (r.author && r.author.toLowerCase().includes(q)) ||
-        (r.class && r.class.toLowerCase().includes(q))
+        Object.values(r).some(val =>
+            val && val.toLowerCase().includes(q)
+        )
     );
 
+    currentPage = 1;
     display(filtered);
 }
+
+function nextPage(){
+    currentPage++;
+    display(data);
+}
+
+function prevPage(){
+    if(currentPage > 1){
+        currentPage--;
+        display(data);
+    }
+}
+
+function downloadPDF(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let y = 10;
+
+    data.slice(0,50).forEach((r,i)=>{
+        doc.text(`${i+1}. ${r.title} - ${r.author}`, 10, y);
+        y += 7;
+    });
+
+    doc.save("catalog.pdf");
+}
+
 </script>
 
 </body>
