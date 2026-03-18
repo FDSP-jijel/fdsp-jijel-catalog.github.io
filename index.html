@@ -82,6 +82,9 @@ button:hover{background:#0055aa;}
 <br>
 <button onclick="downloadPDF()">تحميل PDF</button>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
 <script>
 
 let data = [];
@@ -178,11 +181,23 @@ function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    let y = 10;
+    const tableData = data.slice(0,50).map(r => [
+        r.title,
+        r.author,
+        r.publisher,
+        r.place,
+        r.edition,
+        r.year,
+        r.class
+    ]);
 
-    data.slice(0,50).forEach((r,i)=>{
-        doc.text(`${i+1}. ${r.title} - ${r.author}`, 10, y);
-        y += 7;
+    doc.autoTable({
+        head: [["العنوان","المؤلف","الناشر","المكان","الطبعة","السنة","التصنيف"]],
+        body: tableData,
+        styles: {
+            font: "helvetica",
+            halign: "right"
+        }
     });
 
     doc.save("catalog.pdf");
