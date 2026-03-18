@@ -50,8 +50,6 @@ button:hover{background:#0055aa;}
 </style>
 
 <!-- مكتبات -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 </head>
@@ -93,7 +91,6 @@ button:hover{background:#0055aa;}
 <button onclick="nextPage()">التالي</button>
 
 <br>
-<button onclick="downloadPDF()">تحميل PDF</button>
 <button onclick="downloadExcel()">تحميل Excel</button>
 
 <script>
@@ -208,59 +205,6 @@ function prevPage(){
     }
 }
 
-// PDF
-function downloadPDF(){
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "landscape" });
-
-    // تجهيز البيانات في جدول
-    const tableData = data.map(r => [
-        r.title,
-        r.author,
-        r.publisher,
-        r.place,
-        r.edition,
-        r.year,
-        r.class
-    ]);
-
-    doc.autoTable({
-        head: [[
-            "العنوان",
-            "المؤلف",
-            "دار النشر",
-            "مكان النشر",
-            "الطبعة",
-            "السنة",
-            "التصنيف"
-        ]],
-
-        body: tableData,
-
-        styles: {
-            fontSize: 8,
-            halign: "right"
-        },
-
-        headStyles: {
-            halign: "right"
-        },
-
-        margin: { top: 20 },
-
-        didDrawPage: function () {
-            doc.text(
-                "فهرس مكتبة كلية الحقوق والعلوم السياسية",
-                280,
-                10,
-                { align: "right" }
-            );
-        }
-    });
-
-    doc.save("catalog.pdf");
-}
     
     function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(data);
