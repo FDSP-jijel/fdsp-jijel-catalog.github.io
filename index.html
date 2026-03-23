@@ -25,7 +25,6 @@ body{
     box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* LOGO */
 .header img{
     width:85px;
     height:85px;
@@ -36,7 +35,6 @@ body{
     padding:3px;
 }
 
-/* TEXT */
 .header-text h2{
     font-size:16px;
     color:#003366;
@@ -90,7 +88,6 @@ body{
     flex:1;
 }
 
-/* TITLE */
 h1{
     color:#003366;
     text-align:center;
@@ -172,10 +169,9 @@ button:hover{
     <div class="sidebar">
         <div class="card">
 
-            <!-- صورة الكلية -->
             <img src="faculty.jpg"
                  alt="صورة الكلية"
-                 onerror="this.style.display='none'; alert('⚠️ صورة الكلية غير موجودة أو اسمها خاطئ');">
+                 onerror="this.style.display='none'">
 
             <p>كلية الحقوق والعلوم السياسية</p>
         </div>
@@ -208,6 +204,7 @@ button:hover{
         <th onclick="sortTable('class')">رقم التصنيف</th>
         </tr>
         </thead>
+
         <tbody id="tbody"></tbody>
         </table>
 
@@ -267,10 +264,14 @@ fetch("catalog_FDSP_jijel.csv")
     display(data);
 });
 
-/* عرض */
+/* عرض + صفحات */
 function display(rows){
 
     currentData = rows;
+
+    const maxPage = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+
+    if(currentPage > maxPage) currentPage = 1;
 
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -297,23 +298,27 @@ function display(rows){
         "عدد الكتب: " + rows.length;
 
     document.getElementById("pageInfo").innerText =
-        "صفحة " + currentPage;
+        "صفحة " + currentPage + " / " + maxPage;
 }
 
 /* بحث */
 function searchTable(){
+
     const q = document.getElementById("search").value.toLowerCase();
+
     const filtered = data.filter(r =>
         Object.values(r).some(v =>
             v && v.toLowerCase().includes(q)
         )
     );
+
     currentPage = 1;
     display(filtered);
 }
 
 /* فلترة */
 function advancedFilter(){
+
     const author = document.getElementById("authorFilter").value.toLowerCase();
     const year = document.getElementById("yearFilter").value;
 
@@ -326,10 +331,13 @@ function advancedFilter(){
     display(filtered);
 }
 
-/* تنقل */
+/* تنقل الصفحات */
 function nextPage(){
-    currentPage++;
-    display(currentData);
+    const maxPage = Math.ceil(currentData.length / rowsPerPage);
+    if(currentPage < maxPage){
+        currentPage++;
+        display(currentData);
+    }
 }
 
 function prevPage(){
@@ -341,6 +349,7 @@ function prevPage(){
 
 /* Excel */
 function downloadExcel(){
+
     const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "catalog");
