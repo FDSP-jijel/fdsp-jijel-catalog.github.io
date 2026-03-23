@@ -13,13 +13,6 @@ body{
     background:linear-gradient(to right,#eef2f3,#dfe9f3);
 }
 
-/* الصفحة الرئيسية */
-.container{
-    display:flex;
-    gap:20px;
-    align-items:flex-start;
-}
-
 /* HEADER */
 .header{
     display:flex;
@@ -32,7 +25,7 @@ body{
     box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* الشعار */
+/* LOGO */
 .header img{
     width:85px;
     height:85px;
@@ -43,7 +36,7 @@ body{
     padding:3px;
 }
 
-/* النص */
+/* TEXT */
 .header-text h2{
     font-size:16px;
     color:#003366;
@@ -58,7 +51,14 @@ body{
     margin:3px 0 0;
 }
 
-/* 🔵 الصورة الجانبية للكلية */
+/* LAYOUT */
+.container{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+}
+
+/* SIDEBAR */
 .sidebar{
     width:220px;
 }
@@ -85,7 +85,7 @@ body{
     font-weight:600;
 }
 
-/* المحتوى */
+/* MAIN */
 .main{
     flex:1;
 }
@@ -165,18 +165,23 @@ button:hover{
     </div>
 </div>
 
-<!-- 🔵 الصفحة مقسومة -->
+<!-- LAYOUT -->
 <div class="container">
 
-    <!-- 🔵 Sidebar صورة الكلية -->
+    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="card">
-            <img src="faculty.jpg" alt="صورة الكلية">
+
+            <!-- صورة الكلية -->
+            <img src="faculty.jpg"
+                 alt="صورة الكلية"
+                 onerror="this.style.display='none'; alert('⚠️ صورة الكلية غير موجودة أو اسمها خاطئ');">
+
             <p>كلية الحقوق والعلوم السياسية</p>
         </div>
     </div>
 
-    <!-- 🔵 المحتوى -->
+    <!-- MAIN -->
     <div class="main">
 
         <h1>فهرس مكتبة الكلية</h1>
@@ -221,12 +226,12 @@ button:hover{
 
 <script>
 
-/* نفس السكريبت بدون تغيير */
 let data = [];
 let currentData = [];
 let currentPage = 1;
 let rowsPerPage = 100;
 
+/* تحميل البيانات */
 fetch("catalog_FDSP_jijel.csv")
 .then(res => res.text())
 .then(text => {
@@ -295,16 +300,19 @@ function display(rows){
         "صفحة " + currentPage;
 }
 
-/* فلترة وبحث وتنقل */
+/* بحث */
 function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
     const filtered = data.filter(r =>
-        Object.values(r).some(v => v && v.toLowerCase().includes(q))
+        Object.values(r).some(v =>
+            v && v.toLowerCase().includes(q)
+        )
     );
     currentPage = 1;
     display(filtered);
 }
 
+/* فلترة */
 function advancedFilter(){
     const author = document.getElementById("authorFilter").value.toLowerCase();
     const year = document.getElementById("yearFilter").value;
@@ -318,6 +326,7 @@ function advancedFilter(){
     display(filtered);
 }
 
+/* تنقل */
 function nextPage(){
     currentPage++;
     display(currentData);
@@ -330,6 +339,7 @@ function prevPage(){
     }
 }
 
+/* Excel */
 function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
