@@ -24,14 +24,18 @@ body{
     box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
+/* 🔥 الشعار هنا */
 .header img{
-    width:80px;
-    height:80px;
+    width:85px;
+    height:85px;
     object-fit:contain;
     border-radius:10px;
+    border:2px solid #ddd;
+    background:white;
+    padding:3px;
 }
 
-/* HEADER TEXT */
+/* النص */
 .header-text h2{
     font-size:16px;
     color:#003366;
@@ -39,6 +43,7 @@ body{
     font-weight:700;
 }
 
+/* الكلية (أخضر وكبير) */
 .faculty-title{
     font-size:32px;
     color:#1a8f3a;
@@ -46,13 +51,13 @@ body{
     margin:3px 0 0;
 }
 
-/* PAGE TITLE */
+/* عنوان الصفحة */
 h1{
     color:#003366;
     text-align:center;
 }
 
-/* INPUT */
+/* inputs */
 input{
     padding:12px;
     width:250px;
@@ -62,7 +67,7 @@ input{
     margin:5px;
 }
 
-/* TABLE */
+/* table */
 table{
     border-collapse:collapse;
     width:100%;
@@ -88,7 +93,7 @@ tr:hover{
     background:#f1f1f1;
 }
 
-/* BUTTON */
+/* buttons */
 button{
     padding:10px 15px;
     margin:5px;
@@ -112,25 +117,30 @@ button:hover{
 
 <!-- HEADER -->
 <div class="header">
+
+    <!-- ✅ الشعار (مهم جداً) -->
     <img src="logo.png" alt="شعار الجامعة">
+
     <div class="header-text">
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
         <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
     </div>
+
 </div>
 
 <h1>فهرس مكتبة الكلية</h1>
 
-<!-- SEARCH AND FILTER -->
+<!-- SEARCH -->
 <input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
+
 <br>
+
 <input type="text" id="authorFilter" placeholder="فلترة بالمؤلف">
 <input type="text" id="yearFilter" placeholder="فلترة بالسنة">
 <button onclick="advancedFilter()">تطبيق الفلتر</button>
 
 <p id="count"></p>
 
-<!-- TABLE -->
 <table>
 <thead>
 <tr>
@@ -147,13 +157,17 @@ button:hover{
 </table>
 
 <br>
+
 <button onclick="prevPage()">السابق</button>
 <span id="pageInfo"></span>
 <button onclick="nextPage()">التالي</button>
+
 <br>
+
 <button onclick="downloadExcel()">تحميل Excel</button>
 
 <script>
+
 let data = [];
 let currentData = [];
 let currentPage = 1;
@@ -161,17 +175,26 @@ let rowsPerPage = 100;
 let sortDirection = 1;
 let lastSort = "";
 
-// تحميل CSV
+/* تحميل البيانات */
 fetch("catalog_FDSP_jijel.csv")
 .then(res => res.text())
 .then(text => {
+
     text = text.replace(/^\uFEFF/, "");
     const rows = text.split(/\r?\n/);
+
     rows.slice(1).forEach(row => {
+
         if(!row.trim()) return;
+
         let cols = row.split(";");
-        if(cols.length < 8) cols = row.split("\t");
+
+        if(cols.length < 8){
+            cols = row.split("\t");
+        }
+
         cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
+
         if(cols.length >= 8){
             data.push({
                 title: cols[1] || "",
@@ -184,28 +207,24 @@ fetch("catalog_FDSP_jijel.csv")
             });
         }
     });
+
     display(data);
 });
 
-// عرض البيانات
+/* عرض */
 function display(rows){
+
     currentData = rows;
-    const maxPage = Math.max(1, Math.ceil(rows.length / rowsPerPage));
-    if(currentPage > maxPage) currentPage = 1;
-    const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
-    if(rows.length === 0){
-        document.getElementById("count").innerText = "عدد الكتب: 0";
-        document.getElementById("pageInfo").innerText = "";
-        tbody.innerHTML = "<tr><td colspan='7'>لا توجد نتائج</td></tr>";
-        return;
-    }
+
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
+
     const pageRows = rows.slice(start, end);
+
     let html = "";
     pageRows.forEach(r=>{
-        html += `<tr>
+        html += `
+        <tr>
             <td>${r.title}</td>
             <td>${r.author}</td>
             <td>${r.publisher}</td>
@@ -215,68 +234,65 @@ function display(rows){
             <td>${r.class}</td>
         </tr>`;
     });
-    tbody.innerHTML = html;
-    document.getElementById("count").innerText = `عدد الكتب: ${rows.length}`;
-    document.getElementById("pageInfo").innerText = `صفحة ${currentPage} / ${maxPage}`;
+
+    document.getElementById("tbody").innerHTML = html;
+
+    document.getElementById("count").innerText =
+        "عدد الكتب: " + rows.length;
+
+    document.getElementById("pageInfo").innerText =
+        "صفحة " + currentPage;
 }
 
-// ترتيب الأعمدة
-function sortTable(field){
-    if(lastSort === field) sortDirection *= -1;
-    else { sortDirection = 1; lastSort = field; }
-    const sorted = [...currentData].sort((a,b)=>{
-        let valA = a[field] || "";
-        let valB = b[field] || "";
-        if(!isNaN(valA) && !isNaN(valB)) return (Number(valA)-Number(valB))*sortDirection;
-        return valA.localeCompare(valB)*sortDirection;
-    });
-    currentPage = 1;
-    display(sorted);
-}
-
-// بحث سريع
+/* بحث */
 function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
-    const filtered = data.filter(r => Object.values(r).some(val => val && val.toLowerCase().includes(q)));
+
+    const filtered = data.filter(r =>
+        Object.values(r).some(v =>
+            v && v.toLowerCase().includes(q)
+        )
+    );
+
     currentPage = 1;
     display(filtered);
 }
 
-// فلترة متقدمة
+/* فلترة */
 function advancedFilter(){
     const author = document.getElementById("authorFilter").value.toLowerCase();
     const year = document.getElementById("yearFilter").value;
+
     const filtered = data.filter(r =>
         (!author || r.author.toLowerCase().includes(author)) &&
         (!year || r.year.includes(year))
     );
+
     currentPage = 1;
     display(filtered);
 }
 
-// تنقل بين الصفحات
+/* صفحات */
 function nextPage(){
-    if(currentPage < Math.ceil(currentData.length / rowsPerPage)){ currentPage++; display(currentData); }
-}
-function prevPage(){
-    if(currentPage > 1){ currentPage--; display(currentData); }
+    currentPage++;
+    display(currentData);
 }
 
-// تحميل Excel
+function prevPage(){
+    if(currentPage > 1){
+        currentPage--;
+        display(currentData);
+    }
+}
+
+/* Excel */
 function downloadExcel(){
-    const ws = XLSX.utils.json_to_sheet(currentData.map(r => ({
-        العنوان: r.title,
-        المؤلف: r.author,
-        النشر: r.publisher,
-        المكان: r.place,
-        الطبعة: r.edition,
-        السنة: r.year,
-        التصنيف: r.class
-    })));
+    const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "catalog");
     XLSX.writeFile(wb, "catalog.xlsx");
 }
+
 </script>
 
 </body>
