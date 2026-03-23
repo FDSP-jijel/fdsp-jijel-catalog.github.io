@@ -5,11 +5,19 @@
 <title>فهرس مكتبة كلية الحقوق والعلوم السياسية – جامعة جيجل</title>
 
 <style>
+
 body{
     font-family:Arial;
     margin:40px;
     direction: rtl;
     background:linear-gradient(to right,#eef2f3,#dfe9f3);
+}
+
+/* الصفحة الرئيسية */
+.container{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
 }
 
 /* HEADER */
@@ -24,7 +32,7 @@ body{
     box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* 🔥 الشعار هنا */
+/* الشعار */
 .header img{
     width:85px;
     height:85px;
@@ -43,7 +51,6 @@ body{
     font-weight:700;
 }
 
-/* الكلية (أخضر وكبير) */
 .faculty-title{
     font-size:32px;
     color:#1a8f3a;
@@ -51,13 +58,45 @@ body{
     margin:3px 0 0;
 }
 
-/* عنوان الصفحة */
+/* 🔵 الصورة الجانبية للكلية */
+.sidebar{
+    width:220px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    text-align:center;
+    position:sticky;
+    top:20px;
+}
+
+.card img{
+    width:100%;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:14px;
+    color:#003366;
+    font-weight:600;
+}
+
+/* المحتوى */
+.main{
+    flex:1;
+}
+
+/* TITLE */
 h1{
     color:#003366;
     text-align:center;
 }
 
-/* inputs */
+/* INPUT */
 input{
     padding:12px;
     width:250px;
@@ -67,7 +106,7 @@ input{
     margin:5px;
 }
 
-/* table */
+/* TABLE */
 table{
     border-collapse:collapse;
     width:100%;
@@ -93,7 +132,7 @@ tr:hover{
     background:#f1f1f1;
 }
 
-/* buttons */
+/* BUTTON */
 button{
     padding:10px 15px;
     margin:5px;
@@ -107,6 +146,7 @@ button{
 button:hover{
     background:#0055aa;
 }
+
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -117,65 +157,76 @@ button:hover{
 
 <!-- HEADER -->
 <div class="header">
-
-    <!-- ✅ الشعار (مهم جداً) -->
     <img src="logo.png" alt="شعار الجامعة">
 
     <div class="header-text">
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
         <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
     </div>
-
 </div>
 
-<h1>فهرس مكتبة الكلية</h1>
+<!-- 🔵 الصفحة مقسومة -->
+<div class="container">
 
-<!-- SEARCH -->
-<input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
+    <!-- 🔵 Sidebar صورة الكلية -->
+    <div class="sidebar">
+        <div class="card">
+            <img src="faculty.jpg" alt="صورة الكلية">
+            <p>كلية الحقوق والعلوم السياسية</p>
+        </div>
+    </div>
 
-<br>
+    <!-- 🔵 المحتوى -->
+    <div class="main">
 
-<input type="text" id="authorFilter" placeholder="فلترة بالمؤلف">
-<input type="text" id="yearFilter" placeholder="فلترة بالسنة">
-<button onclick="advancedFilter()">تطبيق الفلتر</button>
+        <h1>فهرس مكتبة الكلية</h1>
 
-<p id="count"></p>
+        <input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
 
-<table>
-<thead>
-<tr>
-<th onclick="sortTable('title')">العنوان</th>
-<th onclick="sortTable('author')">المؤلف</th>
-<th onclick="sortTable('publisher')">دار النشر</th>
-<th onclick="sortTable('place')">مكان النشر</th>
-<th onclick="sortTable('edition')">الطبعة</th>
-<th onclick="sortTable('year')">سنة النشر</th>
-<th onclick="sortTable('class')">رقم التصنيف</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
+        <br>
 
-<br>
+        <input type="text" id="authorFilter" placeholder="فلترة بالمؤلف">
+        <input type="text" id="yearFilter" placeholder="فلترة بالسنة">
+        <button onclick="advancedFilter()">تطبيق الفلتر</button>
 
-<button onclick="prevPage()">السابق</button>
-<span id="pageInfo"></span>
-<button onclick="nextPage()">التالي</button>
+        <p id="count"></p>
 
-<br>
+        <table>
+        <thead>
+        <tr>
+        <th onclick="sortTable('title')">العنوان</th>
+        <th onclick="sortTable('author')">المؤلف</th>
+        <th onclick="sortTable('publisher')">دار النشر</th>
+        <th onclick="sortTable('place')">مكان النشر</th>
+        <th onclick="sortTable('edition')">الطبعة</th>
+        <th onclick="sortTable('year')">سنة النشر</th>
+        <th onclick="sortTable('class')">رقم التصنيف</th>
+        </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        </table>
 
-<button onclick="downloadExcel()">تحميل Excel</button>
+        <br>
+
+        <button onclick="prevPage()">السابق</button>
+        <span id="pageInfo"></span>
+        <button onclick="nextPage()">التالي</button>
+
+        <br>
+
+        <button onclick="downloadExcel()">تحميل Excel</button>
+
+    </div>
+</div>
 
 <script>
 
+/* نفس السكريبت بدون تغيير */
 let data = [];
 let currentData = [];
 let currentPage = 1;
 let rowsPerPage = 100;
-let sortDirection = 1;
-let lastSort = "";
 
-/* تحميل البيانات */
 fetch("catalog_FDSP_jijel.csv")
 .then(res => res.text())
 .then(text => {
@@ -244,21 +295,16 @@ function display(rows){
         "صفحة " + currentPage;
 }
 
-/* بحث */
+/* فلترة وبحث وتنقل */
 function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
-
     const filtered = data.filter(r =>
-        Object.values(r).some(v =>
-            v && v.toLowerCase().includes(q)
-        )
+        Object.values(r).some(v => v && v.toLowerCase().includes(q))
     );
-
     currentPage = 1;
     display(filtered);
 }
 
-/* فلترة */
 function advancedFilter(){
     const author = document.getElementById("authorFilter").value.toLowerCase();
     const year = document.getElementById("yearFilter").value;
@@ -272,7 +318,6 @@ function advancedFilter(){
     display(filtered);
 }
 
-/* صفحات */
 function nextPage(){
     currentPage++;
     display(currentData);
@@ -285,7 +330,6 @@ function prevPage(){
     }
 }
 
-/* Excel */
 function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
