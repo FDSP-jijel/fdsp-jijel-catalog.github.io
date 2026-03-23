@@ -9,21 +9,49 @@ body{
     font-family:Arial;
     margin:40px;
     direction: rtl;
-
-    background:
-        linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
-        url("college.jpg");
-
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-
-    color:white;
+    background:linear-gradient(to right,#eef2f3,#dfe9f3);
 }
 
+/* HEADER */
+.header{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    background:white;
+    padding:15px 20px;
+    border-radius:12px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom:20px;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.header img{
+    width:80px;
+    height:80px;
+    object-fit:contain;
+    border-radius:10px;
+}
+
+.header-text h2{
+    font-size:16px;
+    color:#003366;
+    margin:0;
+    font-weight:700;
+}
+
+.faculty-title{
+    font-size:32px;
+    color:#1a8f3a;
+    font-weight:900;
+    margin:3px 0 0;
+}
+
+/* TITLE */
 h1{
-    color:white;
-    text-shadow:0 2px 5px rgba(0,0,0,0.6);
+    color:#003366;
+    text-align:center;
 }
 
 /* INPUT */
@@ -41,10 +69,9 @@ table{
     border-collapse:collapse;
     width:100%;
     margin-top:20px;
-    background: rgba(255,255,255,0.95);
+    background:white;
     border-radius:10px;
     overflow:hidden;
-    backdrop-filter: blur(6px);
 }
 
 th,td{
@@ -79,51 +106,6 @@ button:hover{
     background:#0055aa;
     transform:translateY(-2px);
 }
-
-/* HEADER */
-.header{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    background:white;
-    padding:15px 20px;
-    border-radius:12px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.1);
-    margin-bottom:20px;
-    position:sticky;
-    top:0;
-    z-index:1000;
-}
-
-.header img{
-    width:70px;
-    height:70px;
-    object-fit:contain;
-    background:white;
-    padding:5px;
-    border-radius:10px;
-}
-
-.header-text h2{
-    font-size:16px;
-    color:#003366;
-    margin:0;
-    font-weight:700;
-}
-
-.faculty-title{
-    font-size:34px;
-    color:#1a8f3a;
-    font-weight:900;
-    margin:3px 0 0;
-    letter-spacing:1px;
-}
-
-.header-text p{
-    margin:3px 0 0;
-    color:#555;
-    font-size:15px;
-}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -132,16 +114,19 @@ button:hover{
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
     <img src="logo.png" alt="شعار الجامعة">
+
     <div class="header-text">
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
-        <p class="faculty-title">كلية الحقوق والعلوم السياسية</p>
+        <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
     </div>
 </div>
 
-<h1 style="text-align:center;">فهرس مكتبة الكلية</h1>
+<h1>فهرس مكتبة الكلية</h1>
 
+<!-- SEARCH -->
 <input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
 
 <br>
@@ -185,9 +170,6 @@ let currentData = [];
 let currentPage = 1;
 let rowsPerPage = 100;
 
-let sortDirection = 1;
-let lastSort = "";
-
 /* تحميل البيانات */
 fetch("catalog_FDSP_jijel.csv")
 .then(res => res.text())
@@ -224,22 +206,19 @@ fetch("catalog_FDSP_jijel.csv")
     display(data);
 });
 
-/* العرض */
+/* عرض */
 function display(rows){
 
     currentData = rows;
 
-    const maxPage = Math.max(1, Math.ceil(rows.length / rowsPerPage));
-    if(currentPage > maxPage) currentPage = 1;
-
-    const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
-
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    rows.slice(start, end).forEach(r=>{
-        tbody.innerHTML += `
+    const pageRows = rows.slice(start, end);
+
+    let html = "";
+    pageRows.forEach(r=>{
+        html += `
         <tr>
             <td>${r.title}</td>
             <td>${r.author}</td>
@@ -251,20 +230,22 @@ function display(rows){
         </tr>`;
     });
 
+    document.getElementById("tbody").innerHTML = html;
+
     document.getElementById("count").innerText =
-        `عدد الكتب: ${rows.length}`;
+        "عدد الكتب: " + rows.length;
 
     document.getElementById("pageInfo").innerText =
-        `صفحة ${currentPage} / ${Math.ceil(rows.length / rowsPerPage)}`;
+        "صفحة " + currentPage;
 }
 
-/* باقي الدوال كما هي */
+/* بحث */
 function searchTable(){
     const q = document.getElementById("search").value.toLowerCase();
 
     const filtered = data.filter(r =>
-        Object.values(r).some(val =>
-            val && val.toLowerCase().includes(q)
+        Object.values(r).some(v =>
+            v && v.toLowerCase().includes(q)
         )
     );
 
@@ -272,6 +253,7 @@ function searchTable(){
     display(filtered);
 }
 
+/* فلترة */
 function advancedFilter(){
     const author = document.getElementById("authorFilter").value.toLowerCase();
     const year = document.getElementById("yearFilter").value;
@@ -285,11 +267,10 @@ function advancedFilter(){
     display(filtered);
 }
 
+/* تنقل */
 function nextPage(){
-    if(currentPage < Math.ceil(currentData.length / rowsPerPage)){
-        currentPage++;
-        display(currentData);
-    }
+    currentPage++;
+    display(currentData);
 }
 
 function prevPage(){
@@ -299,6 +280,7 @@ function prevPage(){
     }
 }
 
+/* Excel */
 function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
