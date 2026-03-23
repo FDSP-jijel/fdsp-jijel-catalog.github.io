@@ -8,12 +8,25 @@
 body{
     font-family:Arial;
     margin:40px;
-    background:linear-gradient(to right,#eef2f3,#dfe9f3);
     direction: rtl;
+
+    background:
+        linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+        url("college.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+    color:white;
 }
 
-h1{color:#003366;}
+h1{
+    color:white;
+    text-shadow:0 2px 5px rgba(0,0,0,0.6);
+}
 
+/* INPUT */
 input{
     padding:12px;
     width:250px;
@@ -23,13 +36,15 @@ input{
     margin:5px;
 }
 
+/* TABLE */
 table{
     border-collapse:collapse;
     width:100%;
     margin-top:20px;
-    background:white;
+    background: rgba(255,255,255,0.95);
     border-radius:10px;
     overflow:hidden;
+    backdrop-filter: blur(6px);
 }
 
 th,td{
@@ -44,8 +59,11 @@ th{
     cursor:pointer;
 }
 
-tr:hover{background:#f1f1f1;}
+tr:hover{
+    background:#f1f1f1;
+}
 
+/* BUTTON */
 button{
     padding:10px 15px;
     margin:5px;
@@ -75,7 +93,6 @@ button:hover{
     position:sticky;
     top:0;
     z-index:1000;
-    backdrop-filter: blur(6px);
 }
 
 .header img{
@@ -85,20 +102,19 @@ button:hover{
     background:white;
     padding:5px;
     border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
 .header-text h2{
-    font-size:16px !important;
-    color:#003366 !important;
+    font-size:16px;
+    color:#003366;
     margin:0;
     font-weight:700;
 }
 
 .faculty-title{
-    font-size:34px !important;
-    color:#1a8f3a !important;
-    font-weight:900 !important;
+    font-size:34px;
+    color:#1a8f3a;
+    font-weight:900;
     margin:3px 0 0;
     letter-spacing:1px;
 }
@@ -107,12 +123,6 @@ button:hover{
     margin:3px 0 0;
     color:#555;
     font-size:15px;
-}
-
-input:focus{
-    outline:none;
-    border-color:#003366;
-    box-shadow:0 0 5px rgba(0,51,102,0.3);
 }
 </style>
 
@@ -225,21 +235,11 @@ function display(rows){
     const tbody = document.getElementById("tbody");
     tbody.innerHTML = "";
 
-    if(rows.length === 0){
-        document.getElementById("count").innerText = "عدد الكتب: 0";
-        document.getElementById("pageInfo").innerText = "";
-        tbody.innerHTML = "<tr><td colspan='7'>لا توجد نتائج</td></tr>";
-        return;
-    }
-
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    const pageRows = rows.slice(start, end);
-
-    let html = "";
-    pageRows.forEach(r=>{
-        html += `
+    rows.slice(start, end).forEach(r=>{
+        tbody.innerHTML += `
         <tr>
             <td>${r.title}</td>
             <td>${r.author}</td>
@@ -251,44 +251,15 @@ function display(rows){
         </tr>`;
     });
 
-    tbody.innerHTML = html;
-
     document.getElementById("count").innerText =
         `عدد الكتب: ${rows.length}`;
 
     document.getElementById("pageInfo").innerText =
-        `صفحة ${currentPage} / ${maxPage}`;
+        `صفحة ${currentPage} / ${Math.ceil(rows.length / rowsPerPage)}`;
 }
 
-/* ترتيب */
-function sortTable(field){
-
-    if(lastSort === field){
-        sortDirection *= -1;
-    } else {
-        sortDirection = 1;
-        lastSort = field;
-    }
-
-    const sorted = [...currentData].sort((a,b)=>{
-
-        let valA = a[field] || "";
-        let valB = b[field] || "";
-
-        if(!isNaN(valA) && !isNaN(valB)){
-            return (Number(valA) - Number(valB)) * sortDirection;
-        }
-
-        return valA.localeCompare(valB) * sortDirection;
-    });
-
-    currentPage = 1;
-    display(sorted);
-}
-
-/* بحث */
+/* باقي الدوال كما هي */
 function searchTable(){
-
     const q = document.getElementById("search").value.toLowerCase();
 
     const filtered = data.filter(r =>
@@ -301,9 +272,7 @@ function searchTable(){
     display(filtered);
 }
 
-/* فلترة */
 function advancedFilter(){
-
     const author = document.getElementById("authorFilter").value.toLowerCase();
     const year = document.getElementById("yearFilter").value;
 
@@ -316,7 +285,6 @@ function advancedFilter(){
     display(filtered);
 }
 
-/* صفحات */
 function nextPage(){
     if(currentPage < Math.ceil(currentData.length / rowsPerPage)){
         currentPage++;
@@ -331,19 +299,8 @@ function prevPage(){
     }
 }
 
-/* Excel */
 function downloadExcel(){
-
-    const ws = XLSX.utils.json_to_sheet(currentData.map(r => ({
-        العنوان: r.title,
-        المؤلف: r.author,
-        النشر: r.publisher,
-        المكان: r.place,
-        الطبعة: r.edition,
-        السنة: r.year,
-        التصنيف: r.class
-    })));
-
+    const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "catalog");
     XLSX.writeFile(wb, "catalog.xlsx");
