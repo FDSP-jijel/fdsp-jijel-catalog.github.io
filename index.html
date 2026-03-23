@@ -5,6 +5,7 @@
 <title>فهرس مكتبة كلية الحقوق والعلوم السياسية – جامعة جيجل</title>
 
 <style>
+
 body{
     font-family:Arial;
     margin:40px;
@@ -20,30 +21,19 @@ body{
     padding:15px 20px;
     border-radius:12px;
     margin-bottom:20px;
-    position:sticky;
-    top:0;
-    z-index:1000;
-
-    /* صورة الشريط فقط */
-    background:url("logo.png") center/cover no-repeat;
+    background:white;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* طبقة شفافة فوق الصورة */
-.header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:rgba(255,255,255,0.85);
-    border-radius:12px;
-    z-index:0;
+/* LOGO */
+.header img{
+    width:90px;
+    height:90px;
+    object-fit:contain;
+    border-radius:10px;
 }
 
-.header *{
-    position:relative;
-    z-index:1;
-}
-
-/* النص داخل الشريط */
+/* TEXT */
 .header-text h2{
     font-size:16px;
     color:#003366;
@@ -109,16 +99,13 @@ button{
     color:white;
     border-radius:6px;
     cursor:pointer;
-    transition:0.3s;
 }
 
 button:hover{
     background:#0055aa;
-    transform:translateY(-2px);
 }
-</style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</style>
 
 </head>
 
@@ -126,176 +113,18 @@ button:hover{
 
 <!-- HEADER -->
 <div class="header">
+
+    <!-- 👇 الشعار هنا -->
+    <img src="logo.png" alt="شعار الجامعة">
+
     <div class="header-text">
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
         <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
     </div>
+
 </div>
 
 <h1>فهرس مكتبة الكلية</h1>
-
-<input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
-
-<br>
-
-<input type="text" id="authorFilter" placeholder="فلترة بالمؤلف">
-<input type="text" id="yearFilter" placeholder="فلترة بالسنة">
-<button onclick="advancedFilter()">تطبيق الفلتر</button>
-
-<p id="count"></p>
-
-<table>
-<thead>
-<tr>
-<th onclick="sortTable('title')">العنوان</th>
-<th onclick="sortTable('author')">المؤلف</th>
-<th onclick="sortTable('publisher')">دار النشر</th>
-<th onclick="sortTable('place')">مكان النشر</th>
-<th onclick="sortTable('edition')">الطبعة</th>
-<th onclick="sortTable('year')">سنة النشر</th>
-<th onclick="sortTable('class')">رقم التصنيف</th>
-</tr>
-</thead>
-
-<tbody id="tbody"></tbody>
-</table>
-
-<br>
-
-<button onclick="prevPage()">السابق</button>
-<span id="pageInfo"></span>
-<button onclick="nextPage()">التالي</button>
-
-<br>
-
-<button onclick="downloadExcel()">تحميل Excel</button>
-
-<script>
-
-let data = [];
-let currentData = [];
-let currentPage = 1;
-let rowsPerPage = 100;
-
-/* تحميل البيانات */
-fetch("catalog_FDSP_jijel.csv")
-.then(res => res.text())
-.then(text => {
-
-    text = text.replace(/^\uFEFF/, "");
-    const rows = text.split(/\r?\n/);
-
-    rows.slice(1).forEach(row => {
-
-        if(!row.trim()) return;
-
-        let cols = row.split(";");
-
-        if(cols.length < 8){
-            cols = row.split("\t");
-        }
-
-        cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
-
-        if(cols.length >= 8){
-            data.push({
-                title: cols[1] || "",
-                author: cols[2] || "",
-                publisher: cols[3] || "",
-                place: cols[5] || "",
-                edition: cols[6] || "",
-                year: cols[4] || "",
-                class: cols[7] || ""
-            });
-        }
-    });
-
-    display(data);
-});
-
-/* عرض */
-function display(rows){
-
-    currentData = rows;
-
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-
-    const pageRows = rows.slice(start, end);
-
-    let html = "";
-    pageRows.forEach(r=>{
-        html += `
-        <tr>
-            <td>${r.title}</td>
-            <td>${r.author}</td>
-            <td>${r.publisher}</td>
-            <td>${r.place}</td>
-            <td>${r.edition}</td>
-            <td>${r.year}</td>
-            <td>${r.class}</td>
-        </tr>`;
-    });
-
-    document.getElementById("tbody").innerHTML = html;
-
-    document.getElementById("count").innerText =
-        "عدد الكتب: " + rows.length;
-
-    document.getElementById("pageInfo").innerText =
-        "صفحة " + currentPage;
-}
-
-/* بحث */
-function searchTable(){
-    const q = document.getElementById("search").value.toLowerCase();
-
-    const filtered = data.filter(r =>
-        Object.values(r).some(v =>
-            v && v.toLowerCase().includes(q)
-        )
-    );
-
-    currentPage = 1;
-    display(filtered);
-}
-
-/* فلترة */
-function advancedFilter(){
-    const author = document.getElementById("authorFilter").value.toLowerCase();
-    const year = document.getElementById("yearFilter").value;
-
-    const filtered = data.filter(r =>
-        (!author || r.author.toLowerCase().includes(author)) &&
-        (!year || r.year.includes(year))
-    );
-
-    currentPage = 1;
-    display(filtered);
-}
-
-/* تنقل */
-function nextPage(){
-    currentPage++;
-    display(currentData);
-}
-
-function prevPage(){
-    if(currentPage > 1){
-        currentPage--;
-        display(currentData);
-    }
-}
-
-/* Excel */
-function downloadExcel(){
-    const ws = XLSX.utils.json_to_sheet(currentData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "catalog");
-    XLSX.writeFile(wb, "catalog.xlsx");
-}
-
-</script>
 
 </body>
 </html>
