@@ -91,7 +91,27 @@ h1{
     text-align:center;
 }
 
-/* INPUT */
+/* SEARCH MODERN */
+.search-box{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+
+.search-input{
+    position:relative;
+}
+
+.search-input span{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#888;
+}
+
 input{
     padding:12px;
     width:250px;
@@ -99,6 +119,10 @@ input{
     border-radius:8px;
     border:1px solid #ccc;
     margin:5px;
+}
+
+.search-input input{
+    padding-right:35px;
 }
 
 /* TABLE */
@@ -173,11 +197,7 @@ button:hover{
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="card">
-
-            <img src="faculty.jpg"
-                 alt="صورة الكلية"
-                 onerror="this.style.display='none'">
-
+            <img src="faculty.jpg" alt="صورة الكلية" onerror="this.style.display='none'">
             <p>كلية الحقوق والعلوم السياسية</p>
         </div>
     </div>
@@ -187,15 +207,25 @@ button:hover{
 
         <h1>فهرس مكتبة الكلية</h1>
 
-        <input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
+        <!-- 🔥 SEARCH MODERN -->
+        <div class="search-box">
 
-        <br>
+            <div class="search-input">
+                <span>🔍</span>
+                <input type="text" id="search"
+                       placeholder="ابحث عن كتاب، مؤلف، أو عنوان..."
+                       onkeyup="searchTable()">
+            </div>
 
-       <input type="text" id="authorFilter" placeholder="تحديد البحث حسب المؤلف">
-<input type="text" id="yearFilter" placeholder="تحديد البحث حسب السنة">
-<button onclick="advancedFilter()" style="display:flex;align-items:center;gap:5px;">
-    🔍 <span>تحديد البحث</span>
-</button>
+            <input type="text" id="authorFilter" placeholder="تحديد البحث حسب المؤلف">
+            <input type="text" id="yearFilter" placeholder="تحديد البحث حسب السنة">
+
+            <button onclick="advancedFilter()" style="background:#1a8f3a;">
+                🔍 تحديد البحث
+            </button>
+
+        </div>
+
         <p id="count"></p>
 
         <table>
@@ -220,7 +250,6 @@ button:hover{
         <span id="pageInfo"></span>
         <button onclick="nextPage()">التالي</button>
 
-        <!-- 🔥 أرقام الصفحات -->
         <div id="pagination"></div>
 
         <br>
@@ -237,7 +266,7 @@ let currentData = [];
 let currentPage = 1;
 let rowsPerPage = 100;
 
-/* تحميل البيانات */
+/* LOAD */
 fetch("catalog_FDSP_jijel.csv")
 .then(res => res.text())
 .then(text => {
@@ -273,7 +302,7 @@ fetch("catalog_FDSP_jijel.csv")
     display(data);
 });
 
-/* العرض + الصفحات */
+/* DISPLAY + PAGINATION */
 function display(rows){
 
     currentData = rows;
@@ -309,7 +338,6 @@ function display(rows){
     document.getElementById("pageInfo").innerText =
         "صفحة " + currentPage + " / " + maxPage;
 
-    /* أرقام الصفحات */
     let pagesHTML = "";
 
     for(let i = 1; i <= maxPage; i++){
@@ -323,13 +351,12 @@ function display(rows){
     document.getElementById("pagination").innerHTML = pagesHTML;
 }
 
-/* الانتقال لصفحة */
 function goToPage(page){
     currentPage = page;
     display(currentData);
 }
 
-/* بحث */
+/* SEARCH */
 function searchTable(){
 
     const q = document.getElementById("search").value.toLowerCase();
@@ -344,7 +371,7 @@ function searchTable(){
     display(filtered);
 }
 
-/* فلترة */
+/* FILTER */
 function advancedFilter(){
 
     const author = document.getElementById("authorFilter").value.toLowerCase();
@@ -359,7 +386,7 @@ function advancedFilter(){
     display(filtered);
 }
 
-/* تنقل */
+/* NAV */
 function nextPage(){
     const maxPage = Math.ceil(currentData.length / rowsPerPage);
     if(currentPage < maxPage){
@@ -375,7 +402,7 @@ function prevPage(){
     }
 }
 
-/* Excel */
+/* EXCEL */
 function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
