@@ -11,6 +11,7 @@ body{
     background:linear-gradient(to right,#eef2f3,#dfe9f3);
     direction: rtl;
 }
+
 h1{color:#003366;}
 
 input{
@@ -61,6 +62,7 @@ button:hover{
     transform:translateY(-2px);
 }
 
+/* HEADER */
 .header{
     display:flex;
     align-items:center;
@@ -73,6 +75,7 @@ button:hover{
     position:sticky;
     top:0;
     z-index:1000;
+    backdrop-filter: blur(6px);
 }
 
 .header img{
@@ -84,6 +87,7 @@ button:hover{
     border-radius:10px;
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
+
 .header-text h2{
     margin:0;
     color:#003366;
@@ -98,15 +102,12 @@ button:hover{
     font-weight:800;
     text-shadow:0 1px 2px rgba(0,0,0,0.1);
 }
-    
+
 .header-text p{
     margin:3px 0 0;
     color:#555;
     font-size:15px;
 }
-.header{
-    backdrop-filter: blur(6px);
-}    
 
 input:focus{
     outline:none;
@@ -124,9 +125,9 @@ input:focus{
 <div class="header">
     <img src="logo.png" alt="شعار الجامعة">
     <div class="header-text">
-    <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
-    <p class="faculty-title">كلية الحقوق والعلوم السياسية</p>
-</div>
+        <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
+        <p class="faculty-title">كلية الحقوق والعلوم السياسية</p>
+    </div>
 </div>
 
 <h1 style="text-align:center;">فهرس مكتبة الكلية</h1>
@@ -153,6 +154,7 @@ input:focus{
 <th onclick="sortTable('class')">رقم التصنيف</th>
 </tr>
 </thead>
+
 <tbody id="tbody"></tbody>
 </table>
 
@@ -176,7 +178,7 @@ let rowsPerPage = 100;
 let sortDirection = 1;
 let lastSort = "";
 
-// تحميل CSV
+/* تحميل البيانات */
 fetch("catalog_FDSP_jijel.csv")
 .then(res => res.text())
 .then(text => {
@@ -212,6 +214,7 @@ fetch("catalog_FDSP_jijel.csv")
     display(data);
 });
 
+/* العرض */
 function display(rows){
 
     currentData = rows;
@@ -232,18 +235,23 @@ function display(rows){
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    rows.slice(start, end).forEach(r=>{
-        tbody.innerHTML += `
+    const pageRows = rows.slice(start, end);
+
+    let html = "";
+    pageRows.forEach(r=>{
+        html += `
         <tr>
-        <td>${r.title}</td>
-        <td>${r.author}</td>
-        <td>${r.publisher}</td>
-        <td>${r.place}</td>
-        <td>${r.edition}</td>
-        <td>${r.year}</td>
-        <td>${r.class}</td>
+            <td>${r.title}</td>
+            <td>${r.author}</td>
+            <td>${r.publisher}</td>
+            <td>${r.place}</td>
+            <td>${r.edition}</td>
+            <td>${r.year}</td>
+            <td>${r.class}</td>
         </tr>`;
     });
+
+    tbody.innerHTML = html;
 
     document.getElementById("count").innerText =
         `عدد الكتب: ${rows.length}`;
@@ -252,6 +260,7 @@ function display(rows){
         `صفحة ${currentPage} / ${maxPage}`;
 }
 
+/* ترتيب */
 function sortTable(field){
 
     if(lastSort === field){
@@ -277,6 +286,7 @@ function sortTable(field){
     display(sorted);
 }
 
+/* بحث */
 function searchTable(){
 
     const q = document.getElementById("search").value.toLowerCase();
@@ -291,6 +301,7 @@ function searchTable(){
     display(filtered);
 }
 
+/* فلترة */
 function advancedFilter(){
 
     const author = document.getElementById("authorFilter").value.toLowerCase();
@@ -305,6 +316,7 @@ function advancedFilter(){
     display(filtered);
 }
 
+/* صفحات */
 function nextPage(){
     if(currentPage < Math.ceil(currentData.length / rowsPerPage)){
         currentPage++;
@@ -319,6 +331,7 @@ function prevPage(){
     }
 }
 
+/* Excel */
 function downloadExcel(){
 
     const ws = XLSX.utils.json_to_sheet(currentData.map(r => ({
