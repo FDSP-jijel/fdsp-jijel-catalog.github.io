@@ -5,6 +5,7 @@
 <title>Library Catalog</title>
 
 <style>
+
 body{
     font-family:Arial;
     margin:40px;
@@ -176,6 +177,7 @@ button:hover{
     text-align:center;
     margin-bottom:10px;
 }
+
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -184,8 +186,10 @@ button:hover{
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
     <img src="logo.png">
+
     <div class="header-text">
         <h2 id="uni">جامعة محمد الصديق بن يحيى – جيجل</h2>
         <div class="faculty-title" id="faculty">كلية الحقوق والعلوم السياسية</div>
@@ -205,6 +209,7 @@ button:hover{
 
 <h1 id="title">فهرس مكتبة الكلية</h1>
 
+<!-- 🌍 LANGUAGE -->
 <div class="lang-switch">
     <button onclick="setLang('ar')">العربية</button>
     <button onclick="setLang('fr')">Français</button>
@@ -212,6 +217,7 @@ button:hover{
 </div>
 
 <div class="search-box">
+
 <div class="search-input">
     <span>🔍</span>
     <input type="text" id="search" onkeyup="searchTable()">
@@ -221,6 +227,7 @@ button:hover{
 <input type="text" id="yearFilter">
 
 <button onclick="advancedFilter()" id="filterBtn">🔍</button>
+
 </div>
 
 <p id="count"></p>
@@ -258,49 +265,74 @@ button:hover{
 
 <script>
 
-let currentLang="ar";
-let translationCache={};
+let currentLang = "ar";
 
-async function translateText(text,lang){
-if(lang==="ar") return text;
-const key=text+"_"+lang;
-if(translationCache[key]) return translationCache[key];
-
-try{
-const res=await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl="+lang+"&dt=t&q="+encodeURIComponent(text));
-const data=await res.json();
-const t=data[0].map(x=>x[0]).join("");
-translationCache[key]=t;
-return t;
-}catch{
-return text;
+const T = {
+ar:{
+title:"فهرس مكتبة الكلية",
+search:"ابحث...",
+author:"تحديد حسب المؤلف",
+year:"تحديد حسب السنة",
+filter:"تحديد البحث",
+count:"عدد الكتب",
+page:"صفحة",
+prev:"السابق",
+next:"التالي",
+excel:"تحميل Excel",
+th:["العنوان","المؤلف","دار النشر","المكان","الطبعة","السنة","التصنيف"]
+},
+fr:{
+title:"Catalogue",
+search:"Rechercher...",
+author:"Filtrer auteur",
+year:"Filtrer année",
+filter:"Appliquer",
+count:"Nombre de livres",
+page:"Page",
+prev:"Précédent",
+next:"Suivant",
+excel:"Excel",
+th:["Titre","Auteur","Éditeur","Lieu","Édition","Année","Classe"]
+},
+en:{
+title:"Library Catalog",
+search:"Search...",
+author:"Filter author",
+year:"Filter year",
+filter:"Apply",
+count:"Books",
+page:"Page",
+prev:"Previous",
+next:"Next",
+excel:"Download Excel",
+th:["Title","Author","Publisher","Place","Edition","Year","Class"]
 }
-}
-
-const T={
-ar:{title:"فهرس مكتبة الكلية",search:"ابحث...",author:"تحديد حسب المؤلف",year:"تحديد حسب السنة",filter:"تحديد البحث",count:"عدد الكتب",page:"صفحة",prev:"السابق",next:"التالي",excel:"تحميل Excel",th:["العنوان","المؤلف","دار النشر","المكان","الطبعة","السنة","التصنيف"]},
-fr:{title:"Catalogue",search:"Rechercher...",author:"Filtrer auteur",year:"Filtrer année",filter:"Appliquer",count:"Nombre de livres",page:"Page",prev:"Précédent",next:"Suivant",excel:"Excel",th:["Titre","Auteur","Éditeur","Lieu","Édition","Année","Classe"]},
-en:{title:"Library Catalog",search:"Search...",author:"Filter author",year:"Filter year",filter:"Apply",count:"Books",page:"Page",prev:"Previous",next:"Next",excel:"Download Excel",th:["Title","Author","Publisher","Place","Edition","Year","Class"]}
 };
 
 function setLang(lang){
+
 currentLang=lang;
-document.body.dir=(lang==="ar")?"rtl":"ltr";
+
+document.body.dir = (lang==="ar")?"rtl":"ltr";
 
 document.getElementById("title").innerText=T[lang].title;
 document.getElementById("search").placeholder=T[lang].search;
 document.getElementById("authorFilter").placeholder=T[lang].author;
 document.getElementById("yearFilter").placeholder=T[lang].year;
 document.getElementById("filterBtn").innerText="🔍 "+T[lang].filter;
+
 document.getElementById("prev").innerText=T[lang].prev;
 document.getElementById("next").innerText=T[lang].next;
 document.getElementById("excel").innerText=T[lang].excel;
 
-T[lang].th.forEach((t,i)=>document.getElementById("th"+(i+1)).innerText=t);
+T[lang].th.forEach((t,i)=>{
+document.getElementById("th"+(i+1)).innerText=t;
+});
 
-display(data);
+display(currentData);
 }
 
+/* DATA + FUNCTIONS نفس الكود القديم بدون تغيير */
 let data=[],currentData=[],currentPage=1,rowsPerPage=100;
 
 fetch("catalog_FDSP_jijel.csv")
@@ -327,12 +359,11 @@ class:cols[7]||""
 });
 }
 });
-
 display(data);
 setLang("ar");
 });
 
-async function display(rows){
+function display(rows){
 
 currentData=rows;
 
@@ -343,17 +374,9 @@ const start=(currentPage-1)*rowsPerPage;
 const pageRows=rows.slice(start,start+rowsPerPage);
 
 let html="";
-
-for(const r of pageRows){
-
-let title=r.title;
-
-if(currentLang!=="ar"){
-title=await translateText(r.title,currentLang);
-}
-
+pageRows.forEach(r=>{
 html+=`<tr>
-<td>${title}</td>
+<td>${r.title}</td>
 <td>${r.author}</td>
 <td>${r.publisher}</td>
 <td>${r.place}</td>
@@ -361,7 +384,7 @@ html+=`<tr>
 <td>${r.year}</td>
 <td>${r.class}</td>
 </tr>`;
-}
+});
 
 document.getElementById("tbody").innerHTML=html;
 
