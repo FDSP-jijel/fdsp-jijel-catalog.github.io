@@ -359,13 +359,18 @@ function goToPage(page){
 /* SEARCH */
 function searchTable(){
 
-    const q = document.getElementById("search").value.toLowerCase();
+    const q = document.getElementById("search").value.toLowerCase().trim();
 
-    const filtered = data.filter(r =>
-        Object.values(r).some(v =>
-            v && v.toLowerCase().includes(q)
-        )
-    );
+    const filtered = data.filter(r => {
+        return (
+            (r.title && r.title.toLowerCase().includes(q)) ||
+            (r.author && r.author.toLowerCase().includes(q)) ||
+            (r.publisher && r.publisher.toLowerCase().includes(q)) ||
+            (r.place && r.place.toLowerCase().includes(q)) ||
+            (r.year && String(r.year).includes(q)) ||
+            (r.class && String(r.class).includes(q))
+        );
+    });
 
     currentPage = 1;
     display(filtered);
